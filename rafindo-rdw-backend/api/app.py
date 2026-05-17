@@ -1,13 +1,16 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 
-# 1. Inisialisasi Firebase Admin SDK menggunakan file kredensial
-cred = credentials.Certificate("firebase-credentials.json")
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+cred_path = os.path.join(base_dir, "firebase-credentials.json")
+
+cred = credentials.Certificate(cred_path)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 

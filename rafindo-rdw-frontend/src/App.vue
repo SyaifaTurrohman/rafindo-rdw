@@ -177,7 +177,7 @@ const handleLogout = () => {
   displayResult.value = '---';
 };
 
-// Validasi input keyboard biar beneran cuma 0-9
+
 const validateKeyboardInput = () => {
   calcInput.value = calcInput.value.replace(/[^0-9]/g, '');
   if (calcInput.value.length > 1) {
@@ -185,13 +185,13 @@ const validateKeyboardInput = () => {
   }
 };
 
-// Aksi ketika tombol On-Screen Numberpad ditekan
+
 const pressNumber = (num) => {
   calcInput.value = num; 
   calcMessage.value = '';
 };
 
-// Bersihkan input
+
 const clearInput = () => {
   calcInput.value = '';
   calcMessage.value = '';

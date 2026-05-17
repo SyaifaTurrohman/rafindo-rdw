@@ -19,7 +19,7 @@ def login():
    
     data = request.json
     email = data.get('email')
-    password = data.get('password') # Pada tahap MVP, password dicocokkan sederhana atau via Firebase Auth
+    password = data.get('password') 
 
     if not email or not password:
         return jsonify({"status": "error", "message": "Email dan password wajib diisi!"}), 400
@@ -32,11 +32,9 @@ def login():
         if user_doc.exists:
             user_data = user_doc.to_dict()
             
-            # AMBIL PASSWORD ASLI DARI FIRESTORE
-            # (Pastikan di dokumen Firestore kamu sudah menambahkan field 'password' untuk tiap user)
+            
             password_database = user_data.get('password') 
 
-            # VALIDASI: Cocokkan password dari input form dengan password di database
             if password == password_database:
                 return jsonify({
                     "status": "success",
@@ -48,7 +46,7 @@ def login():
                     }
                 }), 200
             else:
-                # Jika password salah, kunci aksesnya!
+    
                 return jsonify({"status": "error", "message": "Kata sandi salah!"}), 401
         else:
             return jsonify({"status": "error", "message": "User tidak ditemukan!"}), 404
@@ -66,7 +64,7 @@ def calculate():
     data = request.json
     email = data.get('email')
     input_angka_str = data.get('angka')
-    operasi = data.get('operasi') # 'tambah' atau 'kurang'
+    operasi = data.get('operasi') # 'tambah' dan 'kurang'
 
     if not email or input_angka_str is None or not operasi:
         return jsonify({"status": "error", "message": "Data tidak lengkap!"}), 400

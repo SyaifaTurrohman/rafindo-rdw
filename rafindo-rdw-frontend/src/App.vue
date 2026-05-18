@@ -130,7 +130,7 @@
 import { ref, reactive } from 'vue';
 
 // Konfigurasi URL API Python Backend
-const API_BASE_URL = 'https://rafindo-rdw.vercel.app/api';
+const API_BASE_URL = 'http://127.0.0.1:5000/api';
 
 // State Autentikasi
 const isLoggedIn = ref(false);

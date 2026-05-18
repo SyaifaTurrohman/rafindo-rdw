@@ -1,4 +1,5 @@
 import os
+import json  # Tambahkan import json di bagian atas
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import firebase_admin
@@ -7,16 +8,24 @@ from firebase_admin import credentials, firestore
 app = Flask(__name__)
 CORS(app)
 
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-cred_path = os.path.join(base_dir, "firebase-credentials.json")
+if not firebase_admin._apps:
+    
+    if os.environ.get("FIREBASE_JSON"):
+        firebase_info = json.loads(os.environ.get("FIREBASE_JSON"))
+        cred = credentials.Certificate(firebase_info)
+    else:
+        
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cred_path = os.path.join(base_dir, "firebase-credentials.json")
+        cred = credentials.Certificate(cred_path)
+        
+    firebase_admin.initialize_app(cred)
 
-cred = credentials.Certificate(cred_path)
-firebase_admin.initialize_app(cred)
 db = firestore.client()
+# -------------------------------------------------
 
 @app.route('/api/login', methods=['POST'])
 def login():
-   
     data = request.json
     email = data.get('email')
     password = data.get('password') 
@@ -25,14 +34,11 @@ def login():
         return jsonify({"status": "error", "message": "Email dan password wajib diisi!"}), 400
 
     try:
-        # Mengambil data user dari Firestore berdasarkan Email sebagai Document ID
         user_ref = db.collection('users').document(email)
         user_doc = user_ref.get()
 
         if user_doc.exists:
             user_data = user_doc.to_dict()
-            
-            
             password_database = user_data.get('password') 
 
             if password == password_database:
@@ -46,7 +52,6 @@ def login():
                     }
                 }), 200
             else:
-    
                 return jsonify({"status": "error", "message": "Kata sandi salah!"}), 401
         else:
             return jsonify({"status": "error", "message": "User tidak ditemukan!"}), 404
@@ -57,19 +62,14 @@ def login():
 
 @app.route('/api/calculate', methods=['POST'])
 def calculate():
-    """
-    Endpoint Modul Kalkulasi (Penjumlahan & Pengurangan) tanpa reload.
-    Menerima input angka (0-9) dan melakukan kalkulasi berdasarkan angka dasar user.
-    """
     data = request.json
     email = data.get('email')
     input_angka_str = data.get('angka')
-    operasi = data.get('operasi') # 'tambah' dan 'kurang'
+    operasi = data.get('operasi')
 
     if not email or input_angka_str is None or not operasi:
         return jsonify({"status": "error", "message": "Data tidak lengkap!"}), 400
 
-    # Validasi spesifikasi fungsional: input hanya menerima angka 0 hingga 9
     if not input_angka_str.isdigit() or not (0 <= int(input_angka_str) <= 9):
         return jsonify({"status": "error", "message": "Input hanya menerima angka 0 hingga 9!"}), 400
 
@@ -83,7 +83,6 @@ def calculate():
         angka_dasar = int(user_doc.to_dict().get('angka_dasar', 0))
         input_angka = int(input_angka_str)
 
-        # Logika operasi matematika berdasarkan instruksi asesmen
         if operasi == 'tambah':
             hasil = angka_dasar + input_angka
         elif operasi == 'kurang':
@@ -104,5 +103,4 @@ def calculate():
 
 
 if __name__ == '__main__':
-    # Jalankan server lokal di port 5000
     app.run(debug=True, port=5000)
